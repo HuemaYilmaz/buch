@@ -42,6 +42,7 @@ import {
     Get,
     Headers,
     HttpStatus,
+    NotFoundException,
     Param,
     Query,
     Req,
@@ -214,11 +215,11 @@ export class BuchGetController {
         @Headers('If-None-Match') version: string | undefined,
         @Res() res: Response,
     ): Promise<Response<BuchModel | undefined>> {
-        this.#logger.debug('getById: idStr=%s, version=%s"', idStr, version);
+        this.#logger.debug('getById: idStr=%s, version=%s', idStr, version);
         const id = Number(idStr);
         if (Number.isNaN(id)) {
             this.#logger.debug('getById: NaN');
-            return res.sendStatus(HttpStatus.NOT_FOUND);
+            throw new NotFoundException(`Die Buch-ID ${idStr} ist ungueltig.`);
         }
 
         if (req.accepts([APPLICATION_HAL_JSON, 'json', 'html']) === false) {

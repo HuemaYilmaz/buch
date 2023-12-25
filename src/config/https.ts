@@ -33,6 +33,6 @@ const tlsDir = resolve(RESOURCES_DIR, 'tls');
 
 // public/private keys und Zertifikat fuer TLS
 export const httpsOptions: HttpsOptions = {
-    key: readFileSync(resolve(tlsDir, 'private-key.pem')), // eslint-disable-line security/detect-non-literal-fs-filename
-    cert: readFileSync(resolve(tlsDir, 'certificate.cer')), // eslint-disable-line security/detect-non-literal-fs-filename
+    key: readFileSync(resolve(tlsDir, 'key.pem')), // eslint-disable-line security/detect-non-literal-fs-filename
+    cert: readFileSync(resolve(tlsDir, 'certificate.crt')), // eslint-disable-line security/detect-non-literal-fs-filename
 };

@@ -10,5 +10,7 @@ scripts/*
 temp/*
 node_modules/*
 
+.eslintrc.cjs
+
 # default:
 #node_modules/*

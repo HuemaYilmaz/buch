@@ -17,6 +17,7 @@
 --     cd .extras\compose\db\mysql
 --     docker compose up
 -- (1) 2. PowerShell:
+--     cd .extras\compose\db\mysql
 --     docker compose exec db bash
 --         mysql --user=root --password=p < /sql/create-db-buch.sql
 --         exit

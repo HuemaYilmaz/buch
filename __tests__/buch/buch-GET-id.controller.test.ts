@@ -52,6 +52,7 @@ import { HttpStatus } from '@nestjs/common';
 const idVorhanden = '1';
 const idNichtVorhanden = '999999';
 const idVorhandenETag = '1';
+const idFalsch = 'xy';
 
 // -----------------------------------------------------------------------------
 // T e s t s
@@ -112,6 +113,24 @@ describe('GET /rest/:id', () => {
 
         expect(error).toBe('Not Found');
         expect(message).toEqual(expect.stringContaining(message));
+        expect(statusCode).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    test('Kein Buch zu falscher ID', async () => {
+        // given
+        const url = `/${idFalsch}`;
+
+        // when
+        const response: AxiosResponse<ErrorResponse> = await client.get(url);
+
+        // then
+        const { status, data } = response;
+
+        expect(status).toBe(HttpStatus.NOT_FOUND);
+
+        const { error, statusCode } = data;
+
+        expect(error).toBe('Not Found');
         expect(statusCode).toBe(HttpStatus.NOT_FOUND);
     });
 

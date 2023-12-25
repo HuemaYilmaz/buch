@@ -20,10 +20,15 @@ import { Buch } from '../entity/buch.entity.js';
 import { BuchReadService } from '../service/buch-read.service.js';
 import { HttpExceptionFilter } from './http-exception.filter.js';
 import { ResponseTimeInterceptor } from '../../logger/response-time.interceptor.js';
+import { type Suchkriterien } from '../service/buch-read.service.js';
 import { getLogger } from '../../logger/logger.js';
 
 export interface IdInput {
     readonly id: number;
+}
+
+export interface SuchkriterienInput {
+    readonly suchkriterien: Suchkriterien;
 }
 
 @Resolver((_: any) => Buch)
@@ -56,13 +61,9 @@ export class BuchQueryResolver {
     }
 
     @Query('buecher')
-    async find(@Args() titel: { titel: string } | undefined) {
-        const titelStr = titel?.titel;
-        this.#logger.debug('find: Suchkriterium titel=%s', titelStr);
-        const suchkriterium = titelStr === undefined ? {} : { titel: titelStr };
-
-        const buecher = await this.#service.find(suchkriterium);
-
+    async find(@Args() input: SuchkriterienInput | undefined) {
+        this.#logger.debug('find: input=%o', input);
+        const buecher = await this.#service.find(input?.suchkriterien);
         this.#logger.debug('find: buecher=%o', buecher);
         return buecher;
     }

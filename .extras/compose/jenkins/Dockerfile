@@ -15,19 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# Aufruf:   docker build --sbom true --tag juergenzimmermann/jenkins:2023.10.0 .
+# Aufruf:   docker build --sbom true --tag juergenzimmermann/jenkins:2024.04.0 .
 #           Get-Content Dockerfile | docker run --rm --interactive hadolint/hadolint:2.12.1-beta-debian
 #           docker compose exec jenkins bash
 #               cat /etc/os-release
 #                   ID=debian
 #                   VERSION="12 (bookworm)"
-#           docker sbom juergenzimmermann/jenkins:2023.10.0
+#           docker sbom juergenzimmermann/jenkins:2024.04.0
 
 # https://www.jenkins.io/doc/tutorials/build-a-node-js-and-react-app-with-npm
 # https://www.jenkins.io/doc/book/installing/docker
 # https://manpages.debian.org/bullseye/apt/apt-get.8.en.html
 
-ARG JENKINS_VERSION=2.428-jdk21
+ARG JENKINS_VERSION=2.435-jdk21
 
 FROM jenkins/jenkins:${JENKINS_VERSION}
 
@@ -67,4 +67,4 @@ EOF
 USER jenkins
 # https://plugins.jenkins.io/blueocean
 # https://plugins.jenkins.io/docker-workflow
-RUN jenkins-plugin-cli --plugins "blueocean:1.27.8 docker-workflow:563.vd5d2e5c4007f"
+RUN jenkins-plugin-cli --plugins "blueocean:1.27.9 docker-workflow:563.vd5d2e5c4007f"

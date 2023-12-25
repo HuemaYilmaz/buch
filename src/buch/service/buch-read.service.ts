@@ -23,7 +23,6 @@
 import { Buch, type BuchArt } from './../entity/buch.entity.js';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { QueryBuilder } from './query-builder.js';
-import RE2 from 're2';
 import { getLogger } from '../../logger/logger.js';
 
 /**
@@ -55,7 +54,7 @@ export interface Suchkriterien {
  */
 @Injectable()
 export class BuchReadService {
-    static readonly ID_PATTERN = new RE2('^[1-9][\\d]*$');
+    static readonly ID_PATTERN = /^[1-9]\d{0,10}$/u;
 
     readonly #buchProps: string[];
 
@@ -101,6 +100,9 @@ export class BuchReadService {
         if (buch === null) {
             throw new NotFoundException(`Es gibt kein Buch mit der ID ${id}.`);
         }
+        if (buch.schlagwoerter === null) {
+            buch.schlagwoerter = [];
+        }
 
         if (this.#logger.isLevelEnabled('debug')) {
             this.#logger.debug(
@@ -145,13 +147,18 @@ export class BuchReadService {
         // Das Resultat ist eine leere Liste, falls nichts gefunden
         // Lesen: Keine Transaktion erforderlich
         const buecher = await this.#queryBuilder.build(suchkriterien).getMany();
-        this.#logger.debug('find: buecher=%o', buecher);
         if (buecher.length === 0) {
+            this.#logger.debug('find: Keine Buecher gefunden');
             throw new NotFoundException(
                 `Keine Buecher gefunden: ${JSON.stringify(suchkriterien)}`,
             );
         }
-
+        buecher.forEach((buch) => {
+            if (buch.schlagwoerter === null) {
+                buch.schlagwoerter = [];
+            }
+        });
+        this.#logger.debug('find: buecher=%o', buecher);
         return buecher;
     }
 
@@ -165,7 +172,7 @@ export class BuchReadService {
                 key !== 'typescript'
             ) {
                 this.#logger.debug(
-                    '#find: ungueltiges Suchkriterium "%s"',
+                    '#checkKeys: ungueltiges Suchkriterium "%s"',
                     key,
                 );
                 validKeys = false;

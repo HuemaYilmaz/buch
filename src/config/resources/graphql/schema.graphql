@@ -22,7 +22,7 @@ schema {
 
 "Funktionen, um Bücherdaten zu lesen"
 type Query {
-  buecher(titel: String): [Buch!]
+  buecher(suchkriterien: SuchkriterienInput): [Buch!]
 
   buch(id: ID!): Buch
 }
@@ -74,6 +74,15 @@ type Buch {
 enum Art {
   DRUCKAUSGABE
   KINDLE
+}
+
+"Suchkriterien für Bücher"
+input SuchkriterienInput {
+  titel: String
+  isbn: String
+  rating: Int
+  art: Art
+  lieferbar: Boolean
 }
 
 "Daten zum Titel eines neuen Buches"

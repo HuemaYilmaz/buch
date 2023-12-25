@@ -108,9 +108,9 @@ export class BuchMutationResolver {
     async delete(@Args() id: IdInput) {
         const idStr = id.id;
         this.#logger.debug('delete: id=%s', idStr);
-        const result = await this.#service.delete(idStr);
-        this.#logger.debug('deleteBuch: result=%s', result);
-        return result;
+        const deletePerformed = await this.#service.delete(idStr);
+        this.#logger.debug('deleteBuch: deletePerformed=%s', deletePerformed);
+        return deletePerformed;
     }
 
     #buchDtoToBuch(buchDTO: BuchDTO): Buch {

@@ -44,7 +44,7 @@ const setupSwagger = (app: INestApplication) => {
     const config = new DocumentBuilder()
         .setTitle('Buch')
         .setDescription('Beispiel für Software Engineering')
-        .setVersion('2023.10.0')
+        .setVersion('2024.04.0')
         .addBearerAuth()
         .build();
     const document = SwaggerModule.createDocument(app, config);

@@ -29,7 +29,7 @@ services:
   # https://docs.docker.com/compose/compose-file
   # https://docs.docker.com/compose/compose-file/compose-file-v3
   jenkins-docker:
-    image: docker:24.0.6-dind
+    image: docker:25.0.0-beta.1-dind
     ports:
       - published: 3000
         target: 3000
@@ -61,7 +61,7 @@ services:
           memory: 4G
 
   jenkins:
-    image: juergenzimmermann/jenkins:2023.10.0
+    image: juergenzimmermann/jenkins:2024.04.0
     ports:
       - published: 7070
         target: 8080

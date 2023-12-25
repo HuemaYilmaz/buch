@@ -15,10 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# Aufruf:   docker build --sbom true --tag juergenzimmermann/buch:2023.10.0-distroless .
+# Aufruf:   docker build --sbom true --tag juergenzimmermann/buch:2024.04.0-distroless .
 #               ggf. --progress=plain
 #               ggf. --no-cache
 #           Get-Content Dockerfile | docker run --rm --interactive hadolint/hadolint:2.12.1-beta-debian
+#               Linux:   cat Dockerfile | docker run --rm --interactive hadolint/hadolint:2.12.1-beta-debian
 #           docker network ls
 
 # https://docs.docker.com/engine/reference/builder/#syntax
@@ -39,7 +40,7 @@
 # ---------------------------------------------------------------------------------------
 # S t a g e   b u i l d e r
 # ---------------------------------------------------------------------------------------
-ARG NODE_VERSION=20.8.1
+ARG NODE_VERSION=20.10.0
 FROM node:${NODE_VERSION}-bookworm AS builder
 
 WORKDIR /home/node
@@ -120,7 +121,7 @@ FROM gcr.io/distroless/nodejs20-debian12:nonroot
 # MAINTAINER ist deprecated https://docs.docker.com/engine/reference/builder/#maintainer-deprecated
 LABEL org.opencontainers.image.title="buch" \
     org.opencontainers.image.description="Appserver buch mit distroless-Image" \
-    org.opencontainers.image.version="2023.10.0-distroless" \
+    org.opencontainers.image.version="2024.04.0-distroless" \
     org.opencontainers.image.licenses="GPL-3.0-or-later" \
     org.opencontainers.image.authors="Juergen.Zimmermann@h-ka.de"
 

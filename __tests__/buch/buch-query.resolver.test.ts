@@ -1,3 +1,5 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-extra-non-null-assertion */
 /*
  * Copyright (C) 2021 - present Juergen Zimmermann, Hochschule Karlsruhe
@@ -16,6 +18,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { type Buch, type BuchArt } from '../../src/buch/entity/buch.entity.js';
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
 import {
@@ -25,7 +28,6 @@ import {
     shutdownServer,
     startServer,
 } from '../testserver.js';
-import { type Buch } from '../../src/buch/entity/buch.entity.js';
 import { type GraphQLFormattedError } from 'graphql';
 import { type GraphQLRequest } from '@apollo/server';
 import { HttpStatus } from '@nestjs/common';
@@ -49,10 +51,13 @@ type BuchDTO = Omit<
 const idVorhanden = '1';
 
 const titelVorhanden = 'Alpha';
-
 const teilTitelVorhanden = 'a';
-
 const teilTitelNichtVorhanden = 'abc';
+
+const isbnVorhanden = '978-3-897-22583-1';
+
+const ratingVorhanden = 2;
+const ratingNichtVorhanden = 99;
 
 // -----------------------------------------------------------------------------
 // T e s t s
@@ -70,6 +75,9 @@ describe('GraphQL Queries', () => {
         client = axios.create({
             baseURL,
             httpsAgent,
+            // auch Statuscode 400 als gueltigen Request akzeptieren, wenn z.B.
+            // ein Enum mit einem falschen String getestest wird
+            validateStatus: () => true,
         });
     });
 
@@ -85,10 +93,17 @@ describe('GraphQL Queries', () => {
                     buch(id: "${idVorhanden}") {
                         version
                         isbn
+                        rating
                         art
+                        preis
+                        lieferbar
+                        datum
+                        homepage
+                        schlagwoerter
                         titel {
                             titel
                         }
+                        rabatt(short: true)
                     }
                 }
             `,
@@ -163,7 +178,9 @@ describe('GraphQL Queries', () => {
         const body: GraphQLRequest = {
             query: `
                 {
-                    buecher(titel: "${titelVorhanden}") {
+                    buecher(suchkriterien: {
+                        titel: "${titelVorhanden}"
+                    }) {
                         art
                         titel {
                             titel
@@ -206,8 +223,9 @@ describe('GraphQL Queries', () => {
         const body: GraphQLRequest = {
             query: `
                 {
-                    buecher(titel: "${teilTitelVorhanden}") {
-                        art
+                    buecher(suchkriterien: {
+                        titel: "${teilTitelVorhanden}"
+                    }) {
                         titel {
                             titel
                         }
@@ -249,7 +267,9 @@ describe('GraphQL Queries', () => {
         const body: GraphQLRequest = {
             query: `
                 {
-                    buecher(titel: "${teilTitelNichtVorhanden}") {
+                    buecher(suchkriterien: {
+                        titel: "${teilTitelNichtVorhanden}"
+                    }) {
                         art
                         titel {
                             titel
@@ -285,5 +305,279 @@ describe('GraphQL Queries', () => {
         expect(extensions).toBeDefined();
         expect(extensions!.code).toBe('BAD_USER_INPUT');
     });
+
+    test('Buch zu vorhandener ISBN-Nummer', async () => {
+        // given
+        const body: GraphQLRequest = {
+            query: `
+                {
+                    buecher(suchkriterien: {
+                        isbn: "${isbnVorhanden}"
+                    }) {
+                        isbn
+                        titel {
+                            titel
+                        }
+                    }
+                }
+            `,
+        };
+
+        // when
+        const response: AxiosResponse<GraphQLResponseBody> = await client.post(
+            graphqlPath,
+            body,
+        );
+
+        // then
+        const { status, headers, data } = response;
+
+        expect(status).toBe(HttpStatus.OK);
+        expect(headers['content-type']).toMatch(/json/iu);
+        expect(data.errors).toBeUndefined();
+
+        expect(data.data).toBeDefined();
+
+        const { buecher } = data.data!;
+
+        expect(buecher).not.toHaveLength(0);
+
+        const buecherArray: BuchDTO[] = buecher;
+
+        expect(buecherArray).toHaveLength(1);
+
+        const [buch] = buecherArray;
+        const { isbn, titel } = buch!;
+
+        expect(isbn).toBe(isbnVorhanden);
+        expect(titel?.titel).toBeDefined();
+    });
+
+    test('Buecher zu vorhandenem "rating"', async () => {
+        // given
+        const body: GraphQLRequest = {
+            query: `
+                {
+                    buecher(suchkriterien: {
+                        rating: ${ratingVorhanden},
+                        titel: "${teilTitelVorhanden}"
+                    }) {
+                        rating
+                        titel {
+                            titel
+                        }
+                    }
+                }
+            `,
+        };
+
+        // when
+        const response: AxiosResponse<GraphQLResponseBody> = await client.post(
+            graphqlPath,
+            body,
+        );
+
+        // then
+        const { status, headers, data } = response;
+
+        expect(status).toBe(HttpStatus.OK);
+        expect(headers['content-type']).toMatch(/json/iu);
+        expect(data.errors).toBeUndefined();
+
+        expect(data.data).toBeDefined();
+
+        const { buecher } = data.data!;
+
+        expect(buecher).not.toHaveLength(0);
+
+        const buecherArray: BuchDTO[] = buecher;
+
+        buecherArray.forEach((buch) => {
+            const { rating, titel } = buch;
+
+            expect(rating).toBe(ratingVorhanden);
+            expect(titel?.titel.toLowerCase()).toEqual(
+                expect.stringContaining(teilTitelVorhanden),
+            );
+        });
+    });
+
+    test('Kein Buch zu nicht-vorhandenem "rating"', async () => {
+        // given
+        const body: GraphQLRequest = {
+            query: `
+                {
+                    buecher(suchkriterien: {
+                        rating: ${ratingNichtVorhanden}
+                    }) {
+                        titel {
+                            titel
+                        }
+                    }
+                }
+            `,
+        };
+
+        // when
+        const response: AxiosResponse<GraphQLResponseBody> = await client.post(
+            graphqlPath,
+            body,
+        );
+
+        // then
+        const { status, headers, data } = response;
+
+        expect(status).toBe(HttpStatus.OK);
+        expect(headers['content-type']).toMatch(/json/iu);
+        expect(data.data!.buecher).toBeNull();
+
+        const { errors } = data;
+
+        expect(errors).toHaveLength(1);
+
+        const [error] = errors!;
+        const { message, path, extensions } = error;
+
+        expect(message).toMatch(/^Keine Buecher gefunden:/u);
+        expect(path).toBeDefined();
+        expect(path!![0]).toBe('buecher');
+        expect(extensions).toBeDefined();
+        expect(extensions!.code).toBe('BAD_USER_INPUT');
+    });
+
+    test('Buecher zur Art "KINDLE"', async () => {
+        // given
+        const buchArt: BuchArt = 'KINDLE';
+        const body: GraphQLRequest = {
+            query: `
+                {
+                    buecher(suchkriterien: {
+                        art: ${buchArt}
+                    }) {
+                        art
+                        titel {
+                            titel
+                        }
+                    }
+                }
+            `,
+        };
+
+        // when
+        const response: AxiosResponse<GraphQLResponseBody> = await client.post(
+            graphqlPath,
+            body,
+        );
+
+        // then
+        const { status, headers, data } = response;
+
+        expect(status).toBe(HttpStatus.OK);
+        expect(headers['content-type']).toMatch(/json/iu);
+        expect(data.errors).toBeUndefined();
+
+        expect(data.data).toBeDefined();
+
+        const { buecher } = data.data!;
+
+        expect(buecher).not.toHaveLength(0);
+
+        const buecherArray: BuchDTO[] = buecher;
+
+        buecherArray.forEach((buch) => {
+            const { art, titel } = buch;
+
+            expect(art).toBe(buchArt);
+            expect(titel?.titel).toBeDefined();
+        });
+    });
+
+    test('Buecher zur einer ungueltigen Art', async () => {
+        // given
+        const buchArt = 'UNGUELTIG';
+        const body: GraphQLRequest = {
+            query: `
+                {
+                    buecher(suchkriterien: {
+                        art: ${buchArt}
+                    }) {
+                        titel {
+                            titel
+                        }
+                    }
+                }
+            `,
+        };
+
+        // when
+        const response: AxiosResponse<GraphQLResponseBody> = await client.post(
+            graphqlPath,
+            body,
+        );
+
+        // then
+        const { status, headers, data } = response;
+
+        expect(status).toBe(HttpStatus.BAD_REQUEST);
+        expect(headers['content-type']).toMatch(/json/iu);
+        expect(data.data).toBeUndefined();
+
+        const { errors } = data;
+
+        expect(errors).toHaveLength(1);
+
+        const [error] = errors!;
+        const { extensions } = error;
+
+        expect(extensions).toBeDefined();
+        expect(extensions!.code).toBe('GRAPHQL_VALIDATION_FAILED');
+    });
+
+    test('Buecher mit lieferbar=true', async () => {
+        // given
+        const body: GraphQLRequest = {
+            query: `
+                {
+                    buecher(suchkriterien: {
+                        lieferbar: true
+                    }) {
+                        lieferbar
+                        titel {
+                            titel
+                        }
+                    }
+                }
+            `,
+        };
+
+        // when
+        const response: AxiosResponse<GraphQLResponseBody> = await client.post(
+            graphqlPath,
+            body,
+        );
+
+        // then
+        const { status, headers, data } = response;
+
+        expect(status).toBe(HttpStatus.OK);
+        expect(headers['content-type']).toMatch(/json/iu);
+        expect(data.errors).toBeUndefined();
+
+        expect(data.data).toBeDefined();
+
+        const { buecher } = data.data!;
+
+        expect(buecher).not.toHaveLength(0);
+
+        const buecherArray: BuchDTO[] = buecher;
+
+        buecherArray.forEach((buch) => {
+            const { lieferbar, titel } = buch;
+
+            expect(lieferbar).toBe(true);
+            expect(titel?.titel).toBeDefined();
+        });
+    });
 });
+
 /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-extra-non-null-assertion */

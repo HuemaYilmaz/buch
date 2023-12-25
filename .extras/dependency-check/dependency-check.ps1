@@ -1,4 +1,4 @@
-# Copyright (C) 2022 -  Juergen Zimmermann, Hochschule Karlsruhe
+# Copyright (C) 2023 - present Juergen Zimmermann, Hochschule Karlsruhe
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,14 +15,9 @@
 
 # https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7
 
-# Aufruf:   .\dive.ps1 [bookworm|wolfi]
+# Aufruf:   .\dependency-check.ps1
 # ggf. vorher:  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 # oder:         Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope CurrentUser
-
-# "Param" muss in der 1. Zeile sein
-Param (
-  [string]$base = 'distroless'
-)
 
 Set-StrictMode -Version Latest
 
@@ -33,21 +28,40 @@ if ($versionMinimum -gt $versionCurrent) {
 }
 
 # Titel setzen
-$host.ui.RawUI.WindowTitle = 'dive'
+$host.ui.RawUI.WindowTitle = 'dependency-check'
 
-$diveVersion = 'v0.11.0'
-$imagePrefix = 'juergenzimmermann/'
-$imageBase = 'buch'
-$imageTag = "2024.04.0-$base"
-$image = "$imagePrefix${imageBase}:$imageTag"
+$nvdApiKey = '12345678-1234-1234-1234-123456789012'
+$project = 'buch'
 
-# $image = 'gcr.io/distroless/nodejs20-debian12:nonroot'
-# $image = 'node:20.7.0-bookworm-slim'
-# $image = 'cgr.dev/chainguard/node:latest'
-
-# https://github.com/wagoodman/dive#installation
-docker run --rm --interactive --tty `
-  --mount type='bind,source=/var/run/docker.sock,destination=/var/run/docker.sock' `
-  --hostname dive --name dive `
-  --read-only --cap-drop ALL `
-  wagoodman/dive:$diveVersion $image
+C:\Zimmermann\dependency-check\bin\dependency-check.bat `
+  --nvdApiKey $nvdApiKey `
+  --project $project `
+  --scan ..\.. `
+  --suppression suppression.xml `
+  --out . `
+  --data C:\Zimmermann\dependency-check-data `
+  --disableAssembly `
+  --disableAutoconf `
+  --disableBundleAudit `
+  --disableCentral `
+  --disableCmake `
+  --disableCocoapodsAnalyzer `
+  --disableComposer `
+  --disableCpan `
+  --disableDart `
+  --disableGolangDep `
+  --disableGolangMod `
+  --disableJar `
+  --disableMavenInstall `
+  --disableMSBuild `
+  --disableNugetconf `
+  --disableNuspec `
+  --disablePip `
+  --disablePipfile `
+  --disablePnpmAudit `
+  --disablePoetry `
+  --disablePyDist `
+  --disablePyPkg `
+  --disableRubygems `
+  --disableSwiftPackageManagerAnalyzer `
+  --disableYarnAudit

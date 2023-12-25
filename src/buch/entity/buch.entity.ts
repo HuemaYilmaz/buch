@@ -119,8 +119,9 @@ export class Buch {
     readonly homepage: string | undefined;
 
     // https://typeorm.io/entities#simple-array-column-type
+    // nicht "readonly": null ersetzen durch []
     @Column('simple-array')
-    readonly schlagwoerter: string[] | undefined;
+    schlagwoerter: string[] | null | undefined;
 
     // undefined wegen Updates
     @OneToOne(() => Titel, (titel) => titel.buch, {

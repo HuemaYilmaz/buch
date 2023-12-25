@@ -102,7 +102,7 @@ export class BuchDTO extends BuchDtoOhneRef {
     @ValidateNested()
     @Type(() => TitelDTO)
     @ApiProperty({ type: TitelDTO })
-    readonly titel!: TitelDTO; //NOSONAR
+    readonly titel!: TitelDTO; // NOSONAR
 
     @IsOptional()
     @IsArray()

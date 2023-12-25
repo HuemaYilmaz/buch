@@ -69,17 +69,23 @@ export class QueryBuilder {
      * @returns QueryBuilder
      */
     buildId({ id, mitAbbildungen = false }: BuildIdParams) {
+        // QueryBuilder "buch" fuer Repository<Buch>
         const queryBuilder = this.#repo.createQueryBuilder(this.#buchAlias);
+
+        // Fetch-Join: aus QueryBuilder "buch" die Property "titel" ->  Tabelle "titel"
         queryBuilder.innerJoinAndSelect(
             `${this.#buchAlias}.titel`,
             this.#titelAlias,
         );
+
         if (mitAbbildungen) {
+            // Fetch-Join: aus QueryBuilder "buch" die Property "abbildungen" -> Tabelle "abbildung"
             queryBuilder.leftJoinAndSelect(
                 `${this.#buchAlias}.abbildungen`,
                 this.#abbildungAlias,
             );
         }
+
         queryBuilder.where(`${this.#buchAlias}.id = :id`, { id: id }); // eslint-disable-line object-shorthand
         return queryBuilder;
     }

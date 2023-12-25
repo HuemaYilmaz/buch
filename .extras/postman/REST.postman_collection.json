@@ -243,6 +243,47 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Falsche ID xy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Statuscode 404', () => {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{rest_url}}/:id",
+							"host": [
+								"{{rest_url}}"
+							],
+							"path": [
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "xy",
+									"description": "Buch ID"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"description": "Über die REST-Schnittstelle nach Büchern anhand der ID suchen."

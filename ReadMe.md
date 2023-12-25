@@ -457,15 +457,15 @@ validieren:
 ```powershell
     # Distroless (Debian Bullseye bzw. 11)
     Get-Content Dockerfile | docker run --rm --interactive hadolint/hadolint:2.12.1-beta-debian
-    docker build --sbom true --tag juergenzimmermann/buch:2023.10.0-distroless .
+    docker build --tag juergenzimmermann/buch:2024.04.0-distroless .
 
     # Debian Bookworm (12) slim
     Get-Content Dockerfile.debian | docker run --rm --interactive hadolint/hadolint:2.12.1-beta-debian
-    docker build --sbom true --tag juergenzimmermann/buch:2023.10.0-bookworm --file Dockerfile.bookworm .
+    docker build --tag juergenzimmermann/buch:2024.04.0-bookworm --file Dockerfile.bookworm .
 
     # Wolfi
     Get-Content Dockerfile.wolfi | docker run --rm --interactive hadolint/hadolint:2.12.1-beta-debian
-    docker build --sbom true --tag juergenzimmermann/buch:2023.10.0-wolfi --file Dockerfile.wolfi .
+    docker build --tag juergenzimmermann/buch:2024.04.0-wolfi --file Dockerfile.wolfi .
 ```
 
 ### Image inspizieren
@@ -476,9 +476,9 @@ Mit dem Unterkommando `inspect` kann man die Metadaten, z.B. Labels, zu einem
 Image inspizieren:
 
 ```powershell
-    docker inspect juergenzimmermann/buch:2023.10.0-distroless
-    docker inspect juergenzimmermann/buch:2023.10.0-bookworm
-    docker inspect juergenzimmermann/buch:2023.10.0-wolfi
+    docker inspect juergenzimmermann/buch:2024.04.0-distroless
+    docker inspect juergenzimmermann/buch:2024.04.0-bookworm
+    docker inspect juergenzimmermann/buch:2024.04.0-wolfi
 ```
 
 #### docker sbom
@@ -488,9 +488,9 @@ inspizieren, welche Bestandteilen in einem Docker-Images enthalten sind, z.B.
 npm-Packages oder Debian-Packages.
 
 ```powershell
-    docker sbom juergenzimmermann/buch:2023.10.0-distroless
-    docker sbom juergenzimmermann/buch:2023.10.0-bookworm
-    docker sbom juergenzimmermann/buch:2023.10.0-wolfi
+    docker sbom juergenzimmermann/buch:2024.04.0-distroless
+    docker sbom juergenzimmermann/buch:2024.04.0-bookworm
+    docker sbom juergenzimmermann/buch:2024.04.0-wolfi
 ```
 
 #### dive
@@ -635,9 +635,9 @@ groben Überblick verschaffen, wieviele Sicherheitslücken in den Bibliotheken i
 Image enthalten sind:
 
 ```powershell
-    docker scout quickview juergenzimmermann/buch:2023.10.0-distroless
-    docker scout quickview juergenzimmermann/buch:2023.10.0-bookworm
-    docker scout quickview juergenzimmermann/buch:2023.10.0-wolfi
+    docker scout quickview juergenzimmermann/buch:2024.04.0-distroless
+    docker scout quickview juergenzimmermann/buch:2024.04.0-bookworm
+    docker scout quickview juergenzimmermann/buch:2024.04.0-wolfi
 ```
 
 Dabei bedeutet:
@@ -654,8 +654,8 @@ Die Details zu den CVE-Records im Image kann man durch das Unterkommando `cves`
 von _Scout_ auflisten:
 
 ```powershell
-    docker scout cves juergenzimmermann/buch:2023.10.0-bookworm
-    docker scout cves --format only-packages juergenzimmermann/buch:2023.10.0-bookworm
+    docker scout cves juergenzimmermann/buch:2024.04.0-bookworm
+    docker scout cves --format only-packages juergenzimmermann/buch:2024.04.0-bookworm
 ````
 
 Statt der Kommandozeile kann man auch den Menüpunkt "Docker Scout" im
@@ -752,10 +752,10 @@ wozu es die Datei `Dockerfile.jenkins` gibt, um ein solches Image zu erstellen:
 ```powershell
     cd .extras\compose\jenkins
     Get-Content Dockerfile | docker run --rm --interactive hadolint/hadolint:2.10.0-beta-debian
-    docker build --sbom true --tag juergenzimmermann/jenkins:2023.10.0 .
+    docker build --tag juergenzimmermann/jenkins:2024.04.0 .
 ```
 
-Das neu gebaute Image `juergenzimmermann/jenkins:2023.10.0` wird in
+Das neu gebaute Image `juergenzimmermann/jenkins:2024.04.0` wird in
 `compose.yml` beim Service `jenkins` verwendet:
 
 ```powershell

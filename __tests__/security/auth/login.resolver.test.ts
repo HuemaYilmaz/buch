@@ -55,7 +55,7 @@ describe('Login', () => {
     test('Login', async () => {
         // given
         const username = 'admin';
-        const password = 'p'; //NOSONAR
+        const password = 'p'; // NOSONAR
         const body: GraphQLQuery = {
             query: `
                 mutation {
@@ -103,7 +103,7 @@ describe('Login', () => {
     test('Login mit falschem Passwort', async () => {
         // given
         const username = 'admin';
-        const password = 'FALSCH'; //NOSONAR
+        const password = 'FALSCH'; // NOSONAR
         const body: GraphQLQuery = {
             query: `
                 mutation {

@@ -39,7 +39,7 @@ include:
 # https://docs.docker.com/compose/compose-file/05-services
 services:
   buch:
-    image: juergenzimmermann/buch:2023.10.0-distroless
+    image: juergenzimmermann/buch:2024.04.0-distroless
     depends_on:
       db:
         condition: service_healthy
@@ -56,8 +56,8 @@ services:
         target: /opt/app/log
         read_only: true
       - type: bind
-        source: ../../src/config/resources/tls/private-key.pem
-        target: /opt/app/dist/config/resources/tls/private-key.pem
+        source: ../../src/config/resources/tls/key.pem
+        target: /opt/app/dist/config/resources/tls/key.pem
         read_only: true
       - type: bind
         source: ../../src/config/resources/jwt/private-key.pem

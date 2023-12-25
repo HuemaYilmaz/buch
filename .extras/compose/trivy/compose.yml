@@ -17,8 +17,8 @@
 
 services:
   trivy:
-    image: aquasec/trivy:0.46.0
-    command: [image, juergenzimmermann/buch:2023.10.0-distroless]
+    image: aquasec/trivy:0.48.0
+    command: [image, juergenzimmermann/buch:2024.04.0-distroless]
     volumes:
       - type: bind
         source: C:/Zimmermann/volumes/trivy

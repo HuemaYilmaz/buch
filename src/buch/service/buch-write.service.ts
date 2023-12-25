@@ -33,7 +33,6 @@ import { Buch } from '../entity/buch.entity.js';
 import { BuchReadService } from './buch-read.service.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from '../../mail/mail.service.js';
-import RE2 from 're2';
 import { Titel } from '../entity/titel.entity.js';
 import { getLogger } from '../../logger/logger.js';
 
@@ -53,7 +52,7 @@ export interface UpdateParams {
  */
 @Injectable()
 export class BuchWriteService {
-    private static readonly VERSION_PATTERN = new RE2('^"\\d*"');
+    private static readonly VERSION_PATTERN = /^"\d{1,3}"/u;
 
     readonly #repo: Repository<Buch>;
 
@@ -97,6 +96,7 @@ export class BuchWriteService {
      * @param id ID des zu aktualisierenden Buchs
      * @param version Die Versionsnummer für optimistische Synchronisation
      * @returns Die neue Versionsnummer gemäß optimistischer Synchronisation
+     * @throws NotFoundException falls kein Buch zur ID vorhanden ist
      * @throws VersionInvalidException falls die Versionsnummer ungültig ist
      * @throws VersionOutdatedException falls die Versionsnummer veraltet ist
      */
@@ -173,6 +173,7 @@ export class BuchWriteService {
         try {
             await this.#readService.find({ isbn: isbn }); // eslint-disable-line object-shorthand
         } catch (err) {
+            // err ist vom Typ "unknown": nur 1 catch-Klausel -> instanceof
             if (err instanceof NotFoundException) {
                 return;
             }
@@ -192,43 +193,32 @@ export class BuchWriteService {
         id: number,
         versionStr: string,
     ): Promise<Buch> {
-        const version = this.#validateVersion(versionStr);
         this.#logger.debug(
-            '#validateUpdate: buch=%o, version=%s',
+            '#validateUpdate: buch=%o, id=%s, versionStr=%s',
+            buch,
+            id,
+            versionStr,
+        );
+        if (!BuchWriteService.VERSION_PATTERN.test(versionStr)) {
+            throw new VersionInvalidException(versionStr);
+        }
+
+        const version = Number.parseInt(versionStr.slice(1, -1), 10);
+        this.#logger.debug(
+            '#validateUpdate: buch=%o, version=%d',
             buch,
             version,
         );
 
-        const resultFindById = await this.#findByIdAndCheckVersion(id, version);
-        this.#logger.debug('#validateUpdate: %o', resultFindById);
-        return resultFindById;
-    }
-
-    #validateVersion(version: string | undefined): number {
-        this.#logger.debug('#validateVersion: version=%s', version);
-        if (
-            version === undefined ||
-            !BuchWriteService.VERSION_PATTERN.test(version)
-        ) {
-            throw new VersionInvalidException(version);
-        }
-
-        return Number.parseInt(version.slice(1, -1), 10);
-    }
-
-    async #findByIdAndCheckVersion(id: number, version: number): Promise<Buch> {
         const buchDb = await this.#readService.findById({ id });
 
         // nullish coalescing
         const versionDb = buchDb.version!;
         if (version < versionDb) {
-            this.#logger.debug(
-                '#checkIdAndVersion: VersionOutdated=%d',
-                version,
-            );
+            this.#logger.debug('#validateUpdate: versionDb=%d', version);
             throw new VersionOutdatedException(version);
         }
-
+        this.#logger.debug('#validateUpdate: buchDb=%o', buchDb);
         return buchDb;
     }
 }

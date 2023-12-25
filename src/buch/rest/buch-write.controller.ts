@@ -108,9 +108,9 @@ export class BuchWriteController {
         this.#logger.debug('post: buchDTO=%o', buchDTO);
 
         const buch = this.#buchDtoToBuch(buchDTO);
-        const result = await this.#service.create(buch);
+        const id = await this.#service.create(buch);
 
-        const location = `${getBaseUri(req)}/${result}`;
+        const location = `${getBaseUri(req)}/${id}`;
         this.#logger.debug('post: location=%s', location);
         return res.location(location).send();
     }
